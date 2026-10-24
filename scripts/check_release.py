@@ -42,7 +42,7 @@ def main():
         data = (ROOT / name).read_bytes()
         if any(token in data for token in tokens):
             raise ValueError("A real credential appears in tracked release; value suppressed")
-    config = json.loads((ROOT / "mcp-config.example.json").read_text())
+    config = json.loads((ROOT / "mcp-config.example.json").read_text(encoding="utf-8"))
     if config["mcpServers"]["mcd-mcp"]["headers"]["Authorization"] != "Bearer ${MCD_MCP_TOKEN}":
         raise ValueError("Example configuration must use the environment placeholder")
     if (
@@ -53,7 +53,7 @@ def main():
             "Official declaration changed; compare directly with the official repository"
         )
     for name in ("live-example.html", "demo-data.js", "index.html"):
-        content = (ROOT / "docs" / name).read_text()
+        content = (ROOT / "docs" / name).read_text(encoding="utf-8")
         if any(
             forbidden in content
             for forbidden in ("couponId", "couponCode", "storeCode", "traceId", "Authorization")

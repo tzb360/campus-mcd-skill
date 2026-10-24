@@ -3,6 +3,7 @@
 
 import argparse
 import shutil
+import sys
 from pathlib import Path
 
 
@@ -31,6 +32,9 @@ def install(destination: Path):
 
 
 if __name__ == "__main__":
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
     p = argparse.ArgumentParser()
     p.add_argument("--dest", type=Path, default=Path.home() / ".codex" / "skills" / "campus-mcd")
     install(p.parse_args().dest)

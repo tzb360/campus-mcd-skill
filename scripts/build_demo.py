@@ -11,7 +11,7 @@ from campus_mcd.planner import plan
 from campus_mcd.report import render
 
 root = Path(__file__).resolve().parents[1]
-data = json.loads(files("campus_mcd").joinpath("data/mock.json").read_text())
+data = json.loads(files("campus_mcd").joinpath("data/mock.json").read_text(encoding="utf-8"))
 snapshot = Snapshot.model_validate(data["snapshot"])
 scenarios = {}
 for budget in (10, 15, 20, 25, 30):
@@ -35,7 +35,7 @@ for budget in (10, 15, 20, 25, 30):
     encoding="utf-8",
 )
 (root / "docs/style.css").write_text(
-    files("campus_mcd").joinpath("data/style.css").read_text(), encoding="utf-8"
+    files("campus_mcd").joinpath("data/style.css").read_text(encoding="utf-8"), encoding="utf-8"
 )
 (root / "docs/example-report.html").write_text(
     render(plan(Request.model_validate(data["requests"]["chicken"]), snapshot)), encoding="utf-8"
