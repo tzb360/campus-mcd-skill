@@ -1,0 +1,15 @@
+{
+  "location": "示例校园教学楼（虚构地点）",
+  "start": "2026-10-24T12:00:00+08:00",
+  "deadline": "2026-10-24T13:30:00+08:00",
+  "budget_cents": 2500,
+  "max_walk_minutes": 12,
+  "eat_minutes": 15,
+  "buffer_minutes": 5,
+  "prefer": [
+    "鸡肉"
+  ],
+  "avoid": [],
+  "max_kcal": 700,
+  "available_minutes": 40
+}

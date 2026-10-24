@@ -1,0 +1,13 @@
+{
+  "calls": [
+    {"id":"stores","tool":"query-nearby-stores","arguments":{},"assertions":[{"pointer":"/ok","equals":true}]},
+    {"id":"detail","tool":"query-meal-detail","arguments":{},"assertions":[{"pointer":"/ok","equals":true}]},
+    {"id":"pay","tool":"calculate-price","arguments":{"store":"s1","meal":"m1"},"assertions":[{"pointer":"/ok","equals":true}]}
+  ],
+  "stores": [
+    {"id":{"call":"stores","pointer":"/id"},"name":{"call":"stores","pointer":"/name"},"walk_minutes":4,"walk_basis":"用户假设，不是实时路线","wait_minutes":5,"wait_basis":"用户假设，不是实时排队"}
+  ],
+  "offers": [
+    {"id":"test-only-1","store_id":"s1","name":{"call":"detail","pointer":"/name"},"meal_id":{"call":"detail","pointer":"/id"},"payable":{"call":"pay","pointer":"/total"},"unit":"yuan","kcal":null,"tags":["鸡肉"]}
+  ]
+}
