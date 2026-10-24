@@ -1,0 +1,7 @@
+include SKILL.md CONTEST_DECLARATION.md MCP_INTEGRATION.md mcp-config.example.json CONTRIBUTING.md LICENSE .env.example .gitignore
+recursive-include agents *.yaml
+recursive-include examples *.json *.ics
+recursive-include tests *.py
+recursive-include scripts *.py *.cjs
+recursive-include docs *.md *.txt *.html *.css *.js *.json *.png
+recursive-include .github *.yml
