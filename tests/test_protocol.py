@@ -54,7 +54,7 @@ async def test_streamable_http_discovery_and_quote(local_server):
 
 async def test_full_recipe_over_real_local_protocol(local_server):
     recipe = LiveRecipe.model_validate(
-        json.loads(Path("examples/live-recipe.test-double.json").read_text())
+        json.loads(Path("examples/live-recipe.test-double.json").read_text(encoding="utf-8"))
     )
     async with connect(local_server) as gateway:
         result = await execute(recipe, gateway)

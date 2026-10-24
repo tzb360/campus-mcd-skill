@@ -8,7 +8,7 @@ from campus_mcd.models import Request, Snapshot
 
 @pytest.fixture
 def data():
-    return json.loads(files("campus_mcd").joinpath("data/mock.json").read_text())
+    return json.loads(files("campus_mcd").joinpath("data/mock.json").read_text(encoding="utf-8"))
 
 
 @pytest.fixture
