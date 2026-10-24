@@ -129,12 +129,17 @@ def parser():
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
     args = parser().parse_args()
     # SDK/httpx error logs can contain service-provided strings; use safe CLI messages only.
     logging.getLogger().setLevel(logging.CRITICAL)
     try:
         if args.command == "demo":
-            data = json.loads(files("campus_mcd").joinpath("data/mock.json").read_text())
+            data = json.loads(
+                files("campus_mcd").joinpath("data/mock.json").read_text(encoding="utf-8")
+            )
             request = read(args.request) if args.request else data["requests"][args.scenario]
             result = plan(
                 Request.model_validate(request), Snapshot.model_validate(data["snapshot"])
