@@ -1,164 +1,185 @@
 # 下课开麦 / CampusMcD
 
-**下课只有40分钟？让AI帮你算清楚附近去哪家麦当劳、点什么、花多少钱、来不来得及。**
+**下课只有40分钟？让AI帮你算清楚去哪家麦当劳、点什么、花多少钱、来不来得及。**
 
-面向大学生和赶时间人群的开源 Agent Skill：把返课截止时间、预算、双程步行和餐品偏好放进同一个决策流程，输出三种方案和一张可分享的「麦门课间生存报告」。
+下课开麦是面向大学生和赶时间人群的开源 Agent Skill。给它一个返课时间、一份预算和饮食偏好，它会结合附近门店、可售餐品与已有优惠券，比较三种用餐方案，再生成一张适合分享的「麦门课间生存报告」。
 
-> **当前状态：本地MVP、离线演示及官方MCP只读联调已完成；[Public仓库已创建](https://github.com/tzb360/campus-mcd-skill)，报名Issue正在准备提交，尚无官方审核结果。** 交互演示和主截图均为模拟数据。另提供明确标注日期的[脱敏历史核价样例](docs/live-example.html)，不代表当前报价。
+[在线体验](https://tzb360.github.io/campus-mcd-skill/) · [查看历史核价报告](https://tzb360.github.io/campus-mcd-skill/live-example.html) · [安装为 Skill](#安装为-skill) · [MCP 接入说明](MCP_INTEGRATION.md)
 
-![下课开麦桌面交互演示，画面为模拟数据](docs/assets/demo-desktop.png)
+[![Checks](https://github.com/tzb360/campus-mcd-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/tzb360/campus-mcd-skill/actions/workflows/ci.yml)
 
-## 30秒看懂
+> 在线演示和下方截图使用模拟数据，无需账号。实时模式通过麦当劳中国官方 MCP 查询与试算，需要在本地配置自己的 Token。历史核价报告标注了采集日期，不代表当前价格。
 
-- **先算返课，再看吃什么。** 往返步行、出餐假设、用餐与缓冲都占用时间；25分钟确实不够就不给“来得及”的建议。
-- **三种决策可复算。** A预算优先，B时间优先，C均衡推荐。先过硬约束，再比较完整候选；可能选中同一方案，比较范围不等于全菜单最优。
-- **实时价格有来源。** 真实模式运行时发现官方MCP schema，整单调用`calculate-price`；没有同单无券对照就不展示“省了多少”。
-- **一张能分享的报告。** 默认隐藏门店、精确课表时间与会员券标识，保留预算、餐品、金额、耗时与趣味称号；适合手机截图。
-- **免账号体验。** CLI mock模式 + 40组可交互静态模拟状态。自然语言由加载Skill的Agent理解，Python负责金额和时间，不伪装独立聊天模型。
+![下课开麦交互演示：比较预算、往返耗时和返课余量，图中均为模拟数据](docs/assets/demo-desktop.png)
 
-**English:** CampusMcD is a deadline-aware meal-planning Agent Skill for students and anyone short on time. It combines a budget, a return deadline, explicit travel/wait assumptions, preferences and fresh official McDonald's China MCP quotes. It compares budget-first, time-first and balanced options, then creates a privacy-friendly HTML survival report. The demo is entirely synthetic; official account integration is pending a locally configured token.
+## 它能帮你做什么
 
-## 一分钟运行
+- **安排一段课间。** 把双程步行、排队与出餐估算、用餐时间和返课缓冲一起计算；时间不够时说明原因。
+- **比较三种选择。** 预算优先、时间优先、均衡推荐，每种方案都附金额、耗时、余量和推荐理由。
+- **核算整单价格。** 使用官方 `calculate-price` 试算完整餐品组合，核验已有券是否适用；有有效的同单对照时才展示节省金额。
+- **照顾饮食偏好。** 支持鸡肉等偏好和整餐热量上限。无法可靠匹配营养数据的餐品，不进入限热量推荐。
+- **生成课间生存报告。** 保留预算、餐品、金额、时间可行性和趣味称号，默认隐藏门店、精确时段和会员券标识。
+- **读取本地课表空档。** 支持已展开的单次 ICS 事件，课表文件不上传。
 
-需要Python 3.11+。在仓库目录中：
+## 先试三个场景
+
+打开[在线演示](https://tzb360.github.io/campus-mcd-skill/)，选择场景，或调整预算、时间窗口和饮食偏好：
+
+| 场景 | 看什么 |
+|---|---|
+| 午休90分钟，预算25元 | 比较低预算与短路程的选择 |
+| 课间只有25分钟 | 查看时间不足时的说明 |
+| 40分钟，鸡肉偏好，700千卡以内 | 查看偏好、热量和返课时间共同约束的结果 |
+
+网页提供40组由同一套 Python 决策内核预计算的模拟状态，不接收位置、会员信息或 Token。
+
+<details>
+<summary>查看手机演示截图（模拟数据）</summary>
+
+![下课开麦手机界面，图中均为模拟数据](docs/assets/demo-mobile.png)
+
+</details>
+
+## 本地运行
+
+需要 Python 3.11+：
 
 ```bash
+git clone https://github.com/tzb360/campus-mcd-skill.git
+cd campus-mcd-skill
 python -m venv .venv
-# macOS/Linux
+```
+
+激活虚拟环境后安装：
+
+```bash
+# macOS / Linux
 source .venv/bin/activate
-# Windows PowerShell改用：.venv\Scripts\Activate.ps1
-python -m pip install -e '.[dev]'
+# Windows PowerShell 使用：.venv\Scripts\Activate.ps1
+
+python -m pip install .
 campus-mcd demo --scenario chicken
 ```
 
-打开`output/survival.html`，查看结构化数据`output/plan.json`。不需要账号或Token。所有路径均相对于当前工作目录；也可运行`python scripts/run.py demo`。
-
-三个已实现演示：
+打开 `output/survival.html` 查看报告，`output/plan.json` 包含结构化结果。离线演示无需账号或 Token：
 
 ```bash
-campus-mcd demo --scenario lunch     # 90分钟，25元，比较预算/短路程
-campus-mcd demo --scenario rush      # 25分钟，无可行方案，不强行推荐
-campus-mcd demo --scenario chicken   # 40分钟，鸡肉偏好，整餐≤700千卡
+campus-mcd demo --scenario lunch
+campus-mcd demo --scenario rush
+campus-mcd demo --scenario chicken
 campus-mcd demo --request examples/lunch.request.json
 ```
 
-网页体验（同一Python决策内核生成的40组预计算mock状态，无前端Token入口）：
+也可在本地打开交互网页：
 
 ```bash
-python scripts/build_demo.py
 python -m http.server 8765 --bind 127.0.0.1 --directory docs
 ```
 
-打开 http://127.0.0.1:8765 ，切换预算、返课窗口和偏好，生成报告。也可直接打开[静态模拟报告](docs/example-report.html)。当前可本地体验；公开仓库为 https://github.com/tzb360/campus-mcd-skill ，在线演示地址待Pages发布后更新。
+浏览器访问 http://127.0.0.1:8765 。修改决策逻辑后，可运行 `python scripts/build_demo.py` 重新生成网页演示数据。
 
-## 安装为Skill与自然语言使用
+## 安装为 Skill
+
+在仓库目录运行：
 
 ```bash
 python scripts/install_skill.py
 ```
 
-默认复制到`~/.codex/skills/campus-mcd`，不会覆盖已存在目录，排除.git、虚拟环境、private、output及.env。执行完成后按提示在所选Python环境安装包。在支持SKILL.md的Agent宿主中加载该目录；其他宿主可用`--dest`指定其Skill目录，自动发现机制以宿主为准。本轮仅验证了隔离目录安装与入口，未声称所有宿主均已验收。
+默认安装到 `~/.codex/skills/campus-mcd`；已有目录不会被覆盖。其他支持 `SKILL.md` 的宿主可通过 `--dest` 指定技能目录。让宿主使用已安装本项目依赖的 Python 环境，并加载 [SKILL.md](SKILL.md)。
 
-在加载Skill的Agent中说：
+自然语言理解由 Agent 宿主完成，Python 负责金额、时间和约束比较。可以这样开始：
 
-- 「我12点下课，13点半上课，只有25块钱，帮我安排一顿麦当劳。」→ 保留时间与预算，追问日期、所在地点及步行/缓冲需求。
-- 「附近哪家店有符合我预算的套餐？」→ 补足位置、预算，查询附近门店和可售完整套餐。
-- 「我想吃鸡肉，不想超过700千卡。」→ 核验完整餐品，未知整餐热量排除。
-- 「看看我的券，哪套最划算？」→ 只查看已有券，以整单带券试算验证，不自动领取。
-- 「帮我生成今天的麦门生存报告。」→ 基于已确认条件重算，旧实时报价重新试算。
+> 我12点下课，13点半上课，只有25块钱，帮我安排一顿麦当劳。
+>
+> 附近哪家店有符合我预算的套餐？
+>
+> 我想吃鸡肉，不想超过700千卡。
+>
+> 看看我的券，哪套最划算？
+>
+> 帮我生成今天的麦门生存报告。
 
-以上是Skill流程，不是已完成真实账户测试的对话录像。缺少关键参数时追问，不能自动推断用户位置或编造路程/排队。详细输入见[docs/input.md](docs/input.md)。
+缺少地点、日期或关键耗时条件时，Skill 会引导 Agent 补充询问。支持的输入字段与 ICS 用法见[输入说明](docs/input.md)。
 
-## 真实MCP配置
+## 接入官方 MCP
 
-从[麦当劳MCP平台](https://open.mcd.cn/mcp)申请Token，只保存在本机环境`MCD_MCP_TOKEN`，或本地`private/mcd-token.txt`。macOS/Linux文件权限须为600，Windows使用本人专用ACL。不要把Token发到聊天、网页、Issue或公开配置。
+从[麦当劳 MCP 平台](https://open.mcd.cn/mcp)申请 Token，保存到本机环境变量 `MCD_MCP_TOKEN`，或私有文件 `private/mcd-token.txt`。macOS / Linux 的文件权限须为600；Windows 请使用当前用户专用 ACL。
 
 ```bash
-# 先在本地编辑private/mcd-token.txt，不要将真实值写入命令历史
-chmod 600 private/mcd-token.txt
+# 使用私有文件时，先在本地创建并编辑该文件
+chmod 600 private/mcd-token.txt  # macOS / Linux
 campus-mcd discover --output private/tools.json
 ```
 
-已按真实工具发现结果实现到店自取自动适配：
+由 Agent 将确认后的日期、地点、预算和返课时间写入 `private/request.json`，即可使用到店自取自动规划：
 
 ```bash
-# request.json由Agent根据你本次确认的位置、日期、预算及返课时间生成
-# 8和12是调用者确认的两家候选店单程分钟数，8是排队/出餐假设，不是实时数据
 campus-mcd live-auto --request private/request.json --city 上海 --keyword 你指定的校园或商圈 --walk-minutes 8 12 --wait-minutes 8
 ```
 
-默认最多2家营业店，每店最多3个完整候选；处理套餐轮次、默认特调、已有券交集、TOON营养表精确匹配，整单核价后比较。留空步行或出餐估算时只给价格分析，不宣称时间可行；估算列表按附近门店返回顺序对应，先`call query-nearby-stores`了解候选店，最多2店可用`--store-limit 1`缩为1店。支持的自动套餐为每轮单选；复杂套餐由Agent使用配方处理。无效券/空购物篮不会成为“0元餐”。
+这里的 `8 12` 是两家候选店的单程步行假设，`8` 是排队与出餐假设，须按实际情况确认。候选顺序来自附近门店查询；不提供耗时估算时，程序不会判断时间可行性。
 
-高级入口仍可按本轮schema制作自定义配方：
+自动模式最多比较2家营业店、每店3个完整候选，处理单选套餐轮次、默认特调、已有券与门店适用券的交集，并重新整单核价。复杂套餐可由 Agent 使用[自定义调用配方](docs/live-recipe.md)。
 
-```bash
-campus-mcd call --tool query-nearby-stores --arguments private/args.json --output private/stores.json
-campus-mcd live --request private/request.json --recipe private/recipe.json
-```
+完整工具列表、调用流程和配置方法见 [MCP_INTEGRATION.md](MCP_INTEGRATION.md)。[配置示例](mcp-config.example.json)仅包含环境变量占位符；不同宿主的变量展开方式以其文档为准。
 
-每次实时执行都会发现并校验schema、重新试算，生成私有计划/审计及默认脱敏HTML。`live-auto`使用实际联调过的字段适配，`live`由Agent提供来源映射；结构变化时停止，不猜新接口。完整方法见[MCP_INTEGRATION.md](MCP_INTEGRATION.md)和[live配方说明](docs/live-recipe.md)。
-
-宿主配置示例为[mcp-config.example.json](mcp-config.example.json)，仅含`${MCD_MCP_TOKEN}`占位符；不同宿主的环境展开能力需按其文档配置。Python不自动读.env，可用`CAMPUS_MCD_TOKEN_FILE`与`CAMPUS_MCD_TIMEOUT`配置本地文件/超时。
-
-## 架构与工作原理
+## 工作原理
 
 ```mermaid
 flowchart TD
-  U[自然语言 / 本地ICS空档] --> A[Agent提取约束并追问]
-  A --> D[官方MCP初始化与工具发现]
-  D --> Q[附近门店 / 可售菜单 / 详情 / 营养 / 已有券]
-  Q --> C[最多3店与12完整候选]
-  C --> P[calculate-price整单核价]
-  P --> N[实际响应指针与金额单位校验]
-  N --> E[Python时间预算与偏好决策]
-  E --> O[A预算优先 / B时间优先 / C均衡推荐]
+  U[自然语言需求 / 本地ICS空档] --> A[Agent提取约束并补充询问]
+  A --> D[官方MCP工具发现与参数校验]
+  D --> Q[门店 / 菜单 / 套餐详情 / 营养 / 已有券]
+  Q --> C[筛选有限数量的完整候选]
+  C --> P[calculate-price整单试算]
+  P --> E[Python比较预算、时间和偏好]
+  E --> O[预算优先 / 时间优先 / 均衡推荐]
   O --> H[本地脱敏HTML生存报告]
-  M[明确标记的mock夹具] --> E
+  M[明确标注的模拟数据] --> E
 ```
 
-最短用时 = **双程步行 + 出餐/排队假设 + 用餐 + 缓冲**。缺少确认的耗时就不能判断可行。步行上限、预算、整餐热量、可售状态、有效期是过滤条件；均衡评分使用省预算50%、返课余量30%、偏好匹配20%。最多32次业务调用，其中12次核价（含对照）；不做无界笛卡尔积。
+**所需时间 = 双程步行 + 排队与出餐估算 + 用餐 + 缓冲。** 通过预算、时间、热量、可售性和有效期约束后，再按不同策略排序。均衡推荐使用省预算50%、返课余量30%、偏好匹配20%的评分。
 
-价格用整数分；报告节省仅来自同店、同商品规格、同取餐方式的报价对照。价格5分钟展示策略是项目策略，不是官方锁价。未来时段需在临近出发重新查询。Python静态演示直接复用决策内核，无第二份JS价格算法。
+金额使用整数分，最终支出来自本次整单试算。只有同店、同商品规格、同取餐方式的有效对照，才用于计算节省金额。空购物篮或商品数量不一致的结果不会被采用。
 
-本地ICS入口：
+每次实时流程最多32次业务调用，其中最多12次试算，包含对照。三种策略可能选中同一候选；比较范围限于本次候选，不保证全菜单最优。
 
-```bash
-campus-mcd ics examples/timetable.ics --date 2026-10-24
-```
-
-支持已展开的单次VEVENT、时区、全天与重叠事件；MVP遇到循环事件会明确报错，避免漏课。不会上传课表或输出课程名、地点。
-
-## 一次真实只读验收
-
-2026-10-24晚间，以公开校园地标及测试时间/步行假设验收，**不是用户真实位置或课程表**。官方`tools/list`发现35个工具，8个所需查询/试算工具均实际调用成功。最终自动规划执行22次业务调用、8次试算请求，比较6候选，4个满足25元/700千卡及测试时间约束。
-
-例如「精选超值随心配：麦香鸡 + 无糖可口可乐中杯」本轮整单应付**¥13.90**，精确匹配的整餐营养**369千卡**。三种策略本轮选择同一候选，未人为制造差异。2次券专属商品的无券试算返回空购物篮，已拒绝用作节省对照，未展示虚假的“省钱”。以上为历史验收，不锁价、不保证当前可售。原始账户数据只在本机private目录；[公开脱敏记录](docs/live-validation.md)。
-
-## 验证与限制
+## 开发与测试
 
 ```bash
+python -m pip install -e '.[dev]'
 python -m pytest -q
 ruff check src tests scripts
 python -m build
-python scripts/check_release.py  # Git仓库提交前的凭据与参赛文件检查
+python scripts/check_release.py
 ```
 
-本轮macOS / Python 3.12验证：**83项测试通过**，包括本地真实Streamable HTTP协议测试、异常、金额、时间、来源、报告脱敏、隔离安装及异地目录CLI入口。浏览器已实际操作40组模拟状态，在1440/390/320宽度检查，无横向溢出，Console错误与请求失败均为0。截图是浏览器实际导出。CI配置覆盖三个系统及Python3.11/3.12，**远程CI尚未执行，不能声称跨平台全通过**。[详细验收记录](docs/verification.md)
+83项自动测试覆盖金额、返课时间、营养缺失、优惠券、异常处理、只读边界、报告脱敏、ICS和安装。Windows、Linux、macOS 的 Python 3.11 / 3.12 六项 CI 均已通过。[查看 CI](https://github.com/tzb360/campus-mcd-skill/actions/workflows/ci.yml)
 
-已知限制：自动适配只支持到店自取及单选轮次套餐；没有路线/实时排队服务；自然语言需要Agent宿主；响应映射与完整餐品营养对应仍需Agent核验；最多12候选不保证全局最优；偏好标签不等于过敏原保证；ICS循环尚不支持。没有下单、支付、领券和积分消费能力。
+官方 MCP 的8个查询与试算工具已完成真实只读联调。历史案例、数据来源及适配边界见[脱敏联调记录](docs/live-validation.md)；原始会员数据不包含在仓库中。
 
-<details><summary>手机演示截图（模拟数据）</summary>
+## 使用边界与隐私
 
-![手机交互报告，模拟数据](docs/assets/demo-mobile.png)
+- 步行和出餐耗时依赖确认的估算，没有实时路线或排队服务；未来时段的价格与可售状态需临近出发重新查询。
+- 自动适配支持到店自取和每轮单选套餐；复杂组合使用 Agent 配方。个人券查询限第一页、最多200张。
+- 营养信息按餐名与规格精确匹配；偏好标签不能替代完整配料或过敏原核验。
+- ICS 暂不支持循环事件，遇到未展开的循环课表会明确提示。
+- 代码只允许8个查询与试算工具，不创建订单、不自动支付、不领取券或消耗积分。
+- Token、精确位置与会员原始数据仅保存在本机私有环境。分享版报告默认隐藏门店、精确时段和券标识，分享前仍应检查内容。
 
-</details>
+## 参与项目
 
-## 安全、参赛与贡献
+欢迎通过 [Issue](https://github.com/tzb360/campus-mcd-skill/issues)反馈体验、报告问题或提出功能建议，也欢迎提交 PR。反馈时请提供可复现的场景，并隐藏 Token、券号、精确地点等私人信息。[贡献指南](CONTRIBUTING.md)
 
-代码强制只读8工具白名单；凭据不进入前端、报告或日志，Bearer服务URL固定且不跟随重定向。私人输入/审计默认600权限并被Git忽略；分享HTML默认隐藏位置、门店、精确课程时段与券标识。真实审计不要上传。HTML字段转义，外部返回不被视为Agent指令。
+如果这个工具对你有帮助，欢迎 Star 或分享[在线演示](https://tzb360.github.io/campus-mcd-skill/)。
 
-原创代码和视觉使用[MIT许可](LICENSE)；[参赛声明](CONTEST_DECLARATION.md)从官方原样复制，不受本项目改写。官方文档/声明及商标权利属于相应权利方；MIT不授予官方商标或MCP服务的额外使用权。本项目由参赛者独立开发，非麦当劳官方产品，营养信息不构成专业建议。未使用WorkBuddy，不提供虚假开发记录。
+本项目参加2026麦当劳程序员创意开发大赛，[报名 Issue](https://github.com/M-China/mcd-developer-innovation-challenge/issues/1294)已提交，接收状态以官方回复为准。
 
-[赛事核验与差异化](docs/contest-research.md) · [发布/报名交接](docs/release-checklist.md) · [报名正文草稿](docs/submission-issue.txt) · [传播文案与反馈计划](docs/promotion.md) · [贡献指南](CONTRIBUTING.md)
+原创代码与视觉使用 [MIT License](LICENSE)。[参赛声明](CONTEST_DECLARATION.md)保留官方原文。本项目为独立开源作品，非麦当劳官方产品；不包含官方商标授权，餐品、营养与价格以官方渠道为准，输出不构成专业营养建议。
 
-欢迎用模拟场景提出可复现反馈，特别是时间假设、报告可读性和约束遗漏。请只附脱敏信息。若项目对你有实际帮助，欢迎自愿Star；不组织互刷、不使用机器人或虚假账号。
+## English
+
+**A meal plan that fits between classes.** CampusMcD is an open-source Agent Skill for students and anyone short on time. It combines a budget, a return deadline, meal preferences, explicit travel and waiting assumptions, and quotes from McDonald's China official MCP server.
+
+Compare budget-first, time-first and balanced options, then generate a privacy-friendly HTML survival report. [Try the account-free demo](https://tzb360.github.io/campus-mcd-skill/) with synthetic data, or connect your own local MCP token for live queries and price calculation. Natural-language interaction requires an Agent host; the Python CLI also accepts structured requests. The project is read-only and does not place orders or make payments.
