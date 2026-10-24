@@ -1,0 +1,12 @@
+{
+  "states": 40,
+  "viewports": [
+    1440,
+    390,
+    320
+  ],
+  "consoleErrors": 0,
+  "failedRequests": 0,
+  "mode": "mock",
+  "browser": "155.0.8059.85"
+}
