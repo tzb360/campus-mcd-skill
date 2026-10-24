@@ -1,0 +1,6 @@
+interface:
+  display_name: "下课开麦"
+  short_description: "把预算、餐品和返课时间一起算，生成课间生存报告"
+  default_prompt: "使用 $campus-mcd 帮我规划下课后的一顿麦当劳，先核实位置、预算和返课时间。"
+policy:
+  allow_implicit_invocation: true
