@@ -1,0 +1,140 @@
+{
+  "requests": {
+    "lunch": {
+      "location": "示例校园教学楼（虚构地点）",
+      "start": "2026-10-24T12:00:00+08:00",
+      "deadline": "2026-10-24T13:30:00+08:00",
+      "budget_cents": 2500,
+      "max_walk_minutes": 12,
+      "eat_minutes": 15,
+      "buffer_minutes": 5,
+      "prefer": [],
+      "avoid": []
+    },
+    "rush": {
+      "location": "示例校园教学楼（虚构地点）",
+      "start": "2026-10-24T12:00:00+08:00",
+      "deadline": "2026-10-24T12:25:00+08:00",
+      "budget_cents": 2500,
+      "max_walk_minutes": 12,
+      "eat_minutes": 15,
+      "buffer_minutes": 5,
+      "prefer": [],
+      "avoid": []
+    },
+    "chicken": {
+      "location": "示例校园教学楼（虚构地点）",
+      "start": "2026-10-24T12:00:00+08:00",
+      "deadline": "2026-10-24T13:30:00+08:00",
+      "budget_cents": 2500,
+      "max_walk_minutes": 12,
+      "eat_minutes": 15,
+      "buffer_minutes": 5,
+      "prefer": [
+        "鸡肉"
+      ],
+      "avoid": [],
+      "max_kcal": 700,
+      "available_minutes": 40
+    }
+  },
+  "snapshot": {
+    "mode": "mock",
+    "stores": [
+      {
+        "id": "demo-a",
+        "name": "模拟·校门口店",
+        "walk_minutes": 4,
+        "walk_basis": "演示假设：单程4分钟，非路线服务数据",
+        "wait_minutes": 6,
+        "wait_basis": "演示假设：排队及出餐6分钟，非门店承诺"
+      },
+      {
+        "id": "demo-b",
+        "name": "模拟·图书馆街店",
+        "walk_minutes": 8,
+        "walk_basis": "演示假设：单程8分钟，非路线服务数据",
+        "wait_minutes": 3,
+        "wait_basis": "演示假设：排队及出餐3分钟，非门店承诺"
+      }
+    ],
+    "offers": [
+      {
+        "id": "demo-1",
+        "store_id": "demo-b",
+        "name": "鸡肉堡 + 玉米杯（模拟组合）",
+        "payable_cents": 1390,
+        "baseline_cents": 1990,
+        "kcal": 520,
+        "tags": [
+          "鸡肉"
+        ],
+        "coupon": "模拟已持有券",
+        "available": true,
+        "quote_at": "2026-10-24T12:00:00+08:00",
+        "evidence": "离线模拟夹具，不代表真实餐品价格、营养或优惠"
+      },
+      {
+        "id": "demo-2",
+        "store_id": "demo-a",
+        "name": "鸡肉堡 + 无糖饮料（模拟组合）",
+        "payable_cents": 1990,
+        "baseline_cents": null,
+        "kcal": 490,
+        "tags": [
+          "鸡肉"
+        ],
+        "coupon": null,
+        "available": true,
+        "quote_at": "2026-10-24T12:00:00+08:00",
+        "evidence": "离线模拟夹具，不代表真实餐品价格、营养或优惠"
+      },
+      {
+        "id": "demo-3",
+        "store_id": "demo-a",
+        "name": "双堡分享餐（模拟套餐）",
+        "payable_cents": 2490,
+        "baseline_cents": 2990,
+        "kcal": 860,
+        "tags": [
+          "牛肉"
+        ],
+        "coupon": "模拟门店券",
+        "available": true,
+        "quote_at": "2026-10-24T12:00:00+08:00",
+        "evidence": "离线模拟夹具，不代表真实餐品价格、营养或优惠"
+      },
+      {
+        "id": "demo-4",
+        "store_id": "demo-b",
+        "name": "轻食鸡肉组合（模拟套餐）",
+        "payable_cents": 2190,
+        "baseline_cents": null,
+        "kcal": 620,
+        "tags": [
+          "鸡肉"
+        ],
+        "coupon": null,
+        "available": true,
+        "quote_at": "2026-10-24T12:00:00+08:00",
+        "evidence": "离线模拟夹具，不代表真实餐品价格、营养或优惠"
+      },
+      {
+        "id": "demo-5",
+        "store_id": "demo-a",
+        "name": "早餐组合（模拟售罄）",
+        "payable_cents": 1290,
+        "baseline_cents": null,
+        "kcal": null,
+        "tags": [],
+        "coupon": null,
+        "available": false,
+        "quote_at": "2026-10-24T12:00:00+08:00",
+        "evidence": "离线模拟夹具，不代表真实餐品价格、营养或优惠"
+      }
+    ],
+    "warnings": [
+      "所有门店、餐品、营养、报价和券均为虚构演示数据。"
+    ]
+  }
+}
